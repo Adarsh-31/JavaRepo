@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  mysql:
+  mysql-container:
     image: mysql:8.0
     container_name: mysql-container
     environment:
@@ -14,18 +14,18 @@ services:
     networks:
       - my-network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  app:
+  user-service:
     build: .
     container_name: user-service
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
+      mysql-container:
         condition: service_healthy
     networks:
       - my-network
