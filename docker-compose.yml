@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  mysql-container:
+  mysql:
     image: mysql:8.0
     container_name: mysql-container
     environment:
@@ -9,10 +7,10 @@ services:
       MYSQL_DATABASE: userdb
     ports:
       - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
     networks:
       - my-network
+    volumes:
+      - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -20,13 +18,25 @@ services:
       retries: 5
 
   user-service:
-    build: .
+    build:
+      context: ./user-service
     container_name: user-service
     ports:
       - "8080:8080"
     depends_on:
-      mysql-container:
+      mysql:
         condition: service_healthy
+    networks:
+      - my-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - user-service
     networks:
       - my-network
 
